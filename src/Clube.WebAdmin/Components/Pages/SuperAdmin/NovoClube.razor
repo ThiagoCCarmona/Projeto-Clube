@@ -1,0 +1,154 @@
+@page "/superadmin/novo-clube"
+@rendermode InteractiveServer
+@inject IClubeService ClubeService
+@inject NavigationManager Navigation
+
+<PageTitle>Cadastrar Novo Clube - Super Admin</PageTitle>
+
+<div class="mb-4">
+    <a href="superadmin/clubes" class="btn btn-sm btn-outline-secondary mb-2">
+        <i class="bi bi-arrow-left me-1"></i> Voltar para a lista
+    </a>
+    <h2 class="fw-bold mb-1"><i class="bi bi-building-add text-primary me-2"></i> Cadastrar Novo Clube</h2>
+    <p class="text-muted mb-0">Insira as informações cadastrais e dados do Presidente inicial.</p>
+</div>
+
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-4">
+        @if (!string.IsNullOrWhiteSpace(MensagemErro))
+        {
+            <div class="alert alert-danger" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i> @MensagemErro
+            </div>
+        }
+
+        <EditForm Model="Request" OnValidSubmit="SalvarClube">
+            <h5 class="fw-bold text-primary mb-3">1. Dados da Entidade / Clube</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <label class="form-label fw-semibold">Nome Completo do Clube *</label>
+                    <InputText class="form-control" @bind-Value="Request.Nome" placeholder="Ex.: Rotary Club Foz Centro" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Sigla *</label>
+                    <InputText class="form-control" @bind-Value="Request.Sigla" placeholder="Ex.: RFC" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Endereço (Sede)</label>
+                    <InputText class="form-control" @bind-Value="Request.Endereco" placeholder="Rua / Avenida, Número" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Bairro</label>
+                    <InputText class="form-control" @bind-Value="Request.Bairro" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Cidade *</label>
+                    <InputText class="form-control" @bind-Value="Request.Cidade" placeholder="Foz do Iguaçu" required />
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label fw-semibold">UF *</label>
+                    <InputText class="form-control" @bind-Value="Request.UF" placeholder="PR" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Telefone / Fone</label>
+                    <InputText class="form-control" @bind-Value="Request.Telefone" placeholder="(45) 3522-0000" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">E-mail Institucional</label>
+                    <InputText class="form-control" @bind-Value="Request.Email" placeholder="contato@clube.com.br" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Valor Mensalidade Padrão (R$)</label>
+                    <InputNumber class="form-control" @bind-Value="Request.ValorMensalidadePadrao" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Chave PIX do Clube</label>
+                    <InputText class="form-control" @bind-Value="Request.ChavePix" placeholder="Chave CNPJ, e-mail ou telefone" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Tipo da Chave PIX</label>
+                    <InputSelect class="form-select" @bind-Value="Request.TipoChavePix">
+                        <option value="CNPJ">CNPJ</option>
+                        <option value="Email">E-mail</option>
+                        <option value="Telefone">Telefone</option>
+                        <option value="Aleatoria">Chave Aleatória</option>
+                    </InputSelect>
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
+            <h5 class="fw-bold text-primary mb-3">2. Dados do Presidente Inicial (Admin do Clube)</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Nome do Presidente *</label>
+                    <InputText class="form-control" @bind-Value="Request.NomePresidente" placeholder="Nome completo" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">CPF do Presidente *</label>
+                    <InputText class="form-control" @bind-Value="Request.CpfPresidente" placeholder="Somente números" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Telefone / Celular</label>
+                    <InputText class="form-control" @bind-Value="Request.TelefonePresidente" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">E-mail de Login *</label>
+                    <InputText class="form-control" @bind-Value="Request.EmailPresidente" placeholder="presidente@clube.com.br" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Senha Inicial de Acesso *</label>
+                    <InputText type="password" class="form-control" @bind-Value="Request.SenhaPresidente" placeholder="Mínimo 6 caracteres" required />
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a href="superadmin/clubes" class="btn btn-outline-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary px-4 fw-semibold" disabled="@IsSalvando">
+                    @if (IsSalvando)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                        <span>Cadastrando...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-check-lg me-1"></i>
+                        <span>Salvar e Liberar Clube</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private CriarClubeRequest Request = new()
+    {
+        ValorMensalidadePadrao = 150.00m,
+        TipoChavePix = "CNPJ",
+        SenhaPresidente = "admin123"
+    };
+
+    private string? MensagemErro;
+    private bool IsSalvando = false;
+
+    private async Task SalvarClube()
+    {
+        IsSalvando = true;
+        MensagemErro = null;
+
+        try
+        {
+            await ClubeService.CriarClubeAsync(Request);
+            Navigation.NavigateTo("superadmin/clubes");
+        }
+        catch (Exception ex)
+        {
+            MensagemErro = ex.Message;
+        }
+        finally
+        {
+            IsSalvando = false;
+        }
+    }
+}

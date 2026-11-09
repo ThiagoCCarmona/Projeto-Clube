@@ -1,0 +1,176 @@
+@page "/presidente/reservas"
+@rendermode InteractiveServer
+@inject IReservaService ReservaService
+@inject IClubeDbContext DbContext
+
+<PageTitle>Salão Social & Agenda de Locações - Presidente</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-calendar-event text-primary me-2"></i> Salão Social & Agenda de Locações</h2>
+        <p class="text-muted mb-0">Consulte reservas de espaços com bloqueio contínuo de horários (início até término) e homologue solicitações.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(MensagemFeedback))
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="bi bi-info-circle me-2"></i> @MensagemFeedback
+        <button type="button" class="btn-close" @onclick="() => MensagemFeedback = null"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0">Agenda de Reservas</h5>
+        <div class="d-flex gap-2">
+            <span class="badge bg-success py-2 px-3"><i class="bi bi-check-circle me-1"></i> Confirmada</span>
+            <span class="badge bg-warning text-dark py-2 px-3"><i class="bi bi-clock me-1"></i> Pendente</span>
+            <span class="badge bg-danger py-2 px-3"><i class="bi bi-exclamation-triangle me-1"></i> Conflito de Horário</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Espaço</th>
+                        <th>Associado Solicitante</th>
+                        <th>Finalidade do Uso</th>
+                        <th>Período Contínuo (Início - Término)</th>
+                        <th>Origem</th>
+                        <th>Status / Alerta</th>
+                        <th class="text-end">Ações da Diretoria</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Reservas != null && Reservas.Count > 0)
+                    {
+                        @foreach (var r in Reservas)
+                        {
+                            <tr class="@(r.TemConflito ? "table-danger" : "")">
+                                <td>
+                                    <div class="fw-bold"><i class="bi bi-house-door text-primary me-1"></i> @r.NomeEspaco</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@r.NomeAssociado</div>
+                                    @if (!string.IsNullOrWhiteSpace(r.Observacoes))
+                                    {
+                                        <small class="text-muted d-block text-truncate" style="max-width: 250px;">Obs: @r.Observacoes</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">@r.FinalidadeUso</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">
+                                        <i class="bi bi-calendar3 me-1 text-primary"></i> @r.DataHoraInicio.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-arrow-return-right me-1"></i> Até: @r.DataHoraFim.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                    <small class="text-primary fw-semibold">
+                                        Duração: @((r.DataHoraFim - r.DataHoraInicio).TotalHours.ToString("F0")) horas
+                                    </small>
+                                </td>
+                                <td>
+                                    @if (r.CriadoOffline)
+                                    {
+                                        <span class="badge bg-secondary" title="Criado no app móvel offline e sincronizado"><i class="bi bi-cloud-arrow-up me-1"></i> Offline App</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-dark border">Web / Online</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (r.Status == StatusReserva.Confirmada)
+                                    {
+                                        <span class="badge bg-success fs-6"><i class="bi bi-check-lg me-1"></i> Confirmada</span>
+                                    }
+                                    else if (r.Status == StatusReserva.Conflito)
+                                    {
+                                        <span class="badge bg-danger fs-6"><i class="bi bi-exclamation-triangle-fill me-1"></i> Concorrência de Horário</span>
+                                    }
+                                    else if (r.Status == StatusReserva.PendenteAprovacao)
+                                    {
+                                        <span class="badge bg-warning text-dark fs-6"><i class="bi bi-hourglass-split me-1"></i> Aguardando Aprovação</span>
+                                    }
+                                    else if (r.Status == StatusReserva.Cancelada)
+                                    {
+                                        <span class="badge bg-secondary fs-6">Cancelada</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-dark fs-6">Rejeitada</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (r.Status == StatusReserva.PendenteAprovacao || r.Status == StatusReserva.Conflito)
+                                    {
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-success fw-semibold" title="Homologar e Bloquear Horário" @onclick="() => Aprovar(r.Id)">
+                                                <i class="bi bi-check-circle me-1"></i> Homologar
+                                            </button>
+                                            <button class="btn btn-outline-danger" title="Recusar" @onclick="() => Rejeitar(r.Id)">
+                                                <i class="bi bi-x-circle me-1"></i> Recusar
+                                            </button>
+                                        </div>
+                                    }
+                                    else if (r.Status == StatusReserva.Confirmada)
+                                    {
+                                        <button class="btn btn-sm btn-outline-secondary" @onclick="() => Rejeitar(r.Id)">
+                                            Cancelar Homologação
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Finalizado</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-x fs-2 d-block mb-2 text-muted"></i>
+                                Nenhuma reserva registrada no momento.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ReservaDto>? Reservas;
+    private string? MensagemFeedback;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarReservasAsync();
+    }
+
+    private async Task CarregarReservasAsync()
+    {
+        Reservas = await ReservaService.ObterReservasPorClubeAsync();
+    }
+
+    private async Task Aprovar(Guid id)
+    {
+        await ReservaService.AprovarReservaAsync(id);
+        MensagemFeedback = "Reserva homologada! O espaço está bloqueado para o período selecionado, e concorrentes sobrepostos foram automaticamente recusados.";
+        await CarregarReservasAsync();
+    }
+
+    private async Task Rejeitar(Guid id)
+    {
+        await ReservaService.RejeitarReservaAsync(id, "Cancelado pela diretoria.");
+        MensagemFeedback = "Reserva rejeitada.";
+        await CarregarReservasAsync();
+    }
+}

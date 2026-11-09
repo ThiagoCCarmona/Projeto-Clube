@@ -1,0 +1,160 @@
+@page "/presidente/eventos"
+@rendermode InteractiveServer
+@inject IEventoService EventoService
+@inject WebAdminSession Session
+
+<PageTitle>Gestão de Eventos - Presidente</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-megaphone text-primary me-2"></i> Eventos & Comunicados</h2>
+        <p class="text-muted mb-0">Publique almoços, jantares, cafés e feijoadas beneficentes para o público-alvo apropriado.</p>
+    </div>
+    <button class="btn btn-primary shadow-sm" @onclick="() => ExibirFormulario = !ExibirFormulario">
+        <i class="bi bi-calendar-plus me-1"></i> @(ExibirFormulario ? "Fechar Formulário" : "Novo Evento")
+    </button>
+</div>
+
+@if (ExibirFormulario)
+{
+    <div class="card border-0 shadow-sm rounded-3 mb-4 border-start border-primary border-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold text-primary mb-3">Cadastrar Novo Evento do Clube</h5>
+            <EditForm Model="NovoEvento" OnValidSubmit="CriarEvento">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Título do Evento *</label>
+                        <InputText class="form-control" @bind-Value="NovoEvento.Titulo" placeholder="Ex.: Jantar do Dia dos Pais" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Tipo do Evento *</label>
+                        <InputSelect class="form-select" @bind-Value="NovoEvento.TipoEvento">
+                            <option value="@TipoEvento.AlmocoDiaDasMaes">Almoço Dia das Mães</option>
+                            <option value="@TipoEvento.JantarDiaDosPais">Jantar Dia dos Pais</option>
+                            <option value="@TipoEvento.CafeDaTarde">Café da Tarde</option>
+                            <option value="@TipoEvento.FeijoadaBeneficente">Feijoada Beneficente</option>
+                            <option value="@TipoEvento.Confraternizacao">Confraternização</option>
+                            <option value="@TipoEvento.Geral">Geral / Outro</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Público-Alvo *</label>
+                        <InputSelect class="form-select" @bind-Value="NovoEvento.PublicoAlvo">
+                            <option value="@PublicoAlvo.SomenteAssociados">Somente Associados (Interno)</option>
+                            <option value="@PublicoAlvo.AbertoAoPublico">Aberto ao Público Geral</option>
+                            <option value="@PublicoAlvo.Simpatizantes">Simpatizantes & Amigos</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Data / Hora Início *</label>
+                        <InputDate Type="InputDateType.DateTimeLocal" class="form-control" @bind-Value="NovoEvento.DataInicio" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Data / Hora Término *</label>
+                        <InputDate Type="InputDateType.DateTimeLocal" class="form-control" @bind-Value="NovoEvento.DataFim" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Local do Evento</label>
+                        <InputText class="form-control" @bind-Value="NovoEvento.Local" placeholder="Salão Principal / Sede" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Valor do Ingresso / Convite (R$)</label>
+                        <InputNumber class="form-control" @bind-Value="NovoEvento.ValorIngresso" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Descrição e Cardápio</label>
+                        <InputTextArea class="form-control" rows="3" @bind-Value="NovoEvento.Descricao" placeholder="Detalhes do evento, pratos servidos, atrações..." />
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="() => ExibirFormulario = false">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">Salvar e Divulgar Evento</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div class="row g-4">
+    @if (Eventos != null && Eventos.Count > 0)
+    {
+        @foreach (var ev in Eventos)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                        <span class="badge @(ev.PublicoAlvo == PublicoAlvo.SomenteAssociados ? "bg-primary" : "bg-success")">
+                            @(ev.PublicoAlvo == PublicoAlvo.SomenteAssociados ? "Somente Associados" : "Aberto ao Público")
+                        </span>
+                        <span class="badge bg-light text-dark border">@ev.TipoEvento</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold text-dark mb-2">@ev.Titulo</h5>
+                        <p class="text-muted small mb-3">@ev.Descricao</p>
+
+                        <div class="d-flex flex-column gap-2 small text-muted border-top pt-3">
+                            <div><i class="bi bi-calendar3 me-2 text-primary"></i> <strong>Início:</strong> @ev.DataInicio.ToString("dd/MM/yyyy HH:mm")</div>
+                            <div><i class="bi bi-clock me-2 text-primary"></i> <strong>Término:</strong> @ev.DataFim.ToString("dd/MM/yyyy HH:mm")</div>
+                            <div><i class="bi bi-geo-alt me-2 text-primary"></i> <strong>Local:</strong> @ev.Local</div>
+                            <div>
+                                <i class="bi bi-cash me-2 text-success"></i> <strong>Ingresso:</strong> 
+                                @(ev.ValorIngresso > 0 ? ev.ValorIngresso.ToString("C") : "Gratuito / Incluso na Mensalidade")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light border-0 py-3 d-flex justify-content-between align-items-center">
+                        <span class="badge bg-info text-dark fs-6 px-3 py-2">
+                            <i class="bi bi-people-fill me-1"></i> @ev.TotalConfirmados participantes confirmados
+                        </span>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-calendar-x fs-1 d-block mb-2 text-muted"></i>
+            Nenhum evento programado no momento.
+        </div>
+    }
+</div>
+
+@code {
+    private List<EventoDto>? Eventos;
+    private bool ExibirFormulario = false;
+
+    private CriarEventoRequest NovoEvento = new()
+    {
+        DataInicio = DateTime.Today.AddDays(7).AddHours(12),
+        DataFim = DateTime.Today.AddDays(7).AddHours(17),
+        TipoEvento = TipoEvento.AlmocoDiaDasMaes,
+        PublicoAlvo = PublicoAlvo.SomenteAssociados,
+        ValorIngresso = 50.00m,
+        Local = "Salão Social Principal"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarEventosAsync();
+    }
+
+    private async Task CarregarEventosAsync()
+    {
+        Eventos = await EventoService.ListarEventosAsync();
+    }
+
+    private async Task CriarEvento()
+    {
+        await EventoService.CriarEventoAsync(NovoEvento);
+        ExibirFormulario = false;
+        NovoEvento = new CriarEventoRequest
+        {
+            DataInicio = DateTime.Today.AddDays(14).AddHours(12),
+            DataFim = DateTime.Today.AddDays(14).AddHours(16),
+            Local = "Salão Social"
+        };
+        await CarregarEventosAsync();
+    }
+}

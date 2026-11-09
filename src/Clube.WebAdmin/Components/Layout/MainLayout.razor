@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@inject WebAdminSession Session
+@inject ClubeDbContext DbContext
+@inject NavigationManager Navigation
 
 <div class="page">
     <div class="sidebar">
@@ -6,18 +9,122 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class="top-row px-4 d-flex justify-content-between align-items-center bg-white shadow-sm border-bottom">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary fs-6 px-3 py-2">
+                    <i class="bi bi-shield-check me-1"></i> Perfil Atual: @ObterDescricaoPerfil()
+                </span>
+                @if (Session.CurrentClubeId.HasValue && ClubeAtual != null)
+                {
+                    <span class="badge bg-secondary fs-6 px-3 py-2">
+                        <i class="bi bi-geo-alt me-1"></i> @ClubeAtual.Nome (@ClubeAtual.Sigla)
+                    </span>
+                }
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <label class="form-label mb-0 fw-semibold text-muted small">Simular Usuário / Perfil:</label>
+                <select class="form-select form-select-sm w-auto shadow-sm" @onchange="OnSelecionarUsuario">
+                    <option value="superadmin" selected="@(Session.Perfil == PerfilUsuario.SuperAdmin)">Super Admin (Gestor Global)</option>
+                    <option value="presidente_foz" selected="@(Session.Perfil == PerfilUsuario.Presidente && Session.CurrentClubeId == IdFoz)">Carlos Kaneko (Presidente - Rotary Foz)</option>
+                    <option value="tesoureiro_foz" selected="@(Session.Perfil == PerfilUsuario.Tesoureiro && Session.CurrentClubeId == IdFoz)">Marcos Silveira (Tesoureiro - Rotary Foz)</option>
+                    <option value="presidente_guaira" selected="@(Session.Perfil == PerfilUsuario.Presidente && Session.CurrentClubeId == IdGuaira)">Presidente (Iate Clube Guaíra)</option>
+                </select>
+            </div>
         </div>
 
-        <article class="content px-4">
+        <article class="content px-4 py-4">
             @Body
         </article>
     </main>
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+@code {
+    private static readonly Guid IdFoz = Guid.Parse("22222222-2222-2222-2222-222222222222");
+    private static readonly Guid IdGuaira = Guid.Parse("33333333-3333-3333-3333-333333333333");
+    private Domain.Entities.Clube? ClubeAtual;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Session.OnChange += StateHasChanged;
+
+        // Se não tiver usuário logado na sessão, inicia como SuperAdmin
+        if (Session.UsuarioLogado == null)
+        {
+            var superAdmin = await DbContext.Usuarios.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Perfil == PerfilUsuario.SuperAdmin);
+            if (superAdmin != null)
+            {
+                Session.Login(superAdmin);
+            }
+        }
+
+        await CarregarClubeAtualAsync();
+    }
+
+    private async Task OnSelecionarUsuario(ChangeEventArgs e)
+    {
+        var chave = e.Value?.ToString();
+        Usuario? usuario = null;
+
+        if (chave == "superadmin")
+        {
+            usuario = await DbContext.Usuarios.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Perfil == PerfilUsuario.SuperAdmin);
+        }
+        else if (chave == "presidente_foz")
+        {
+            usuario = await DbContext.Usuarios.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Perfil == PerfilUsuario.Presidente && u.ClubeId == IdFoz);
+        }
+        else if (chave == "tesoureiro_foz")
+        {
+            usuario = await DbContext.Usuarios.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Perfil == PerfilUsuario.Tesoureiro && u.ClubeId == IdFoz);
+        }
+        else if (chave == "presidente_guaira")
+        {
+            usuario = await DbContext.Usuarios.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Perfil == PerfilUsuario.Presidente && u.ClubeId == IdGuaira);
+            if (usuario == null)
+            {
+                // Se não existir presidente em Guaíra, cria dinamicamente
+                usuario = new Usuario
+                {
+                    Id = Guid.NewGuid(),
+                    ClubeId = IdGuaira,
+                    Nome = "Presidente Iate Guaíra",
+                    CPF = "77766655544",
+                    Email = "presidente.guaira@clube.com.br",
+                    Perfil = PerfilUsuario.Presidente,
+                    SenhaHash = "admin123",
+                    Ativo = true
+                };
+                DbContext.Usuarios.Add(usuario);
+                await DbContext.SaveChangesAsync();
+            }
+        }
+
+        if (usuario != null)
+        {
+            Session.AlternarPerfil(usuario);
+            await CarregarClubeAtualAsync();
+            Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+        }
+    }
+
+    private async Task CarregarClubeAtualAsync()
+    {
+        if (Session.CurrentClubeId.HasValue)
+        {
+            ClubeAtual = await DbContext.Clubes.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Id == Session.CurrentClubeId.Value);
+        }
+        else
+        {
+            ClubeAtual = null;
+        }
+    }
+
+    private string ObterDescricaoPerfil() => Session.Perfil switch
+    {
+        PerfilUsuario.SuperAdmin => "Super Administrador (Federação)",
+        PerfilUsuario.Presidente => "Presidente do Clube",
+        PerfilUsuario.Tesoureiro => "Tesoureiro do Clube",
+        _ => Session.Perfil.ToString()
+    };
+}

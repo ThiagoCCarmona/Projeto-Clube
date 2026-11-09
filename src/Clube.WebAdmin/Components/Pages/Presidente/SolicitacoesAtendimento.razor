@@ -1,0 +1,185 @@
+@page "/presidente/solicitacoes"
+@rendermode InteractiveServer
+@inject ISolicitacaoService SolicitacaoService
+
+<PageTitle>Atendimento & Reclamações (SAC) - Presidente</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-chat-left-dots text-primary me-2"></i> Canal de Atendimento / SAC</h2>
+        <p class="text-muted mb-0">Responda às solicitações, dúvidas, reclamações e sugestões dos associados do clube.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(MensagemFeedback))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i> @MensagemFeedback
+        <button type="button" class="btn-close" @onclick="() => MensagemFeedback = null"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Associado</th>
+                        <th>Tipo</th>
+                        <th>Assunto / Mensagem</th>
+                        <th>Status</th>
+                        <th>Resposta da Diretoria</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Solicitacoes != null && Solicitacoes.Count > 0)
+                    {
+                        @foreach (var s in Solicitacoes)
+                        {
+                            <tr>
+                                <td>
+                                    <small class="text-muted">@s.DataCriacao.ToString("dd/MM/yyyy HH:mm")</small>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@s.NomeAssociado</div>
+                                </td>
+                                <td>
+                                    @if (s.Tipo == TipoSolicitacao.Reclamacao)
+                                    {
+                                        <span class="badge bg-danger">Reclamação</span>
+                                    }
+                                    else if (s.Tipo == TipoSolicitacao.Sugestao)
+                                    {
+                                        <span class="badge bg-info text-dark">Sugestão</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary">Solicitação</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="fw-bold">@s.Assunto</div>
+                                    <small class="text-muted d-block text-truncate" style="max-width: 300px;">@s.Mensagem</small>
+                                </td>
+                                <td>
+                                    @if (s.Status == StatusSolicitacao.Aberta)
+                                    {
+                                        <span class="badge bg-warning text-dark">Aberta</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Respondida</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(s.RespostaDiretoria))
+                                    {
+                                        <div class="small text-success fw-semibold">
+                                            <i class="bi bi-check2-all me-1"></i> @s.RespostaDiretoria
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small fst-italic">Aguardando posicionamento</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (s.Status == StatusSolicitacao.Aberta)
+                                    {
+                                        <button class="btn btn-sm btn-primary" @onclick="() => IniciarResposta(s)">
+                                            <i class="bi bi-reply me-1"></i> Responder
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-chat-square-text fs-2 d-block mb-2 text-muted"></i>
+                                Nenhuma solicitação ou reclamação pendente.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (SolicitacaoSelecionada != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-3">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold">Responder @SolicitacaoSelecionada.Tipo</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => SolicitacaoSelecionada = null"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Associado</label>
+                        <div class="fw-bold">@SolicitacaoSelecionada.NomeAssociado</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Assunto</label>
+                        <div>@SolicitacaoSelecionada.Assunto</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Mensagem Enviada</label>
+                        <div class="p-3 bg-light rounded border small">@SolicitacaoSelecionada.Mensagem</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Resposta Oficial da Diretoria *</label>
+                        <textarea class="form-control" rows="4" @bind="TextoResposta" placeholder="Digite aqui o posicionamento ou solução adotada pelo clube..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="() => SolicitacaoSelecionada = null">Cancelar</button>
+                    <button type="button" class="btn btn-primary px-4 fw-semibold" @onclick="EnviarResposta" disabled="@string.IsNullOrWhiteSpace(TextoResposta)">
+                        Enviar Resposta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<SolicitacaoDto>? Solicitacoes;
+    private SolicitacaoDto? SolicitacaoSelecionada;
+    private string TextoResposta = string.Empty;
+    private string? MensagemFeedback;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarSolicitacoesAsync();
+    }
+
+    private async Task CarregarSolicitacoesAsync()
+    {
+        Solicitacoes = await SolicitacaoService.ListarSolicitacoesAsync();
+    }
+
+    private void IniciarResposta(SolicitacaoDto s)
+    {
+        SolicitacaoSelecionada = s;
+        TextoResposta = string.Empty;
+    }
+
+    private async Task EnviarResposta()
+    {
+        if (SolicitacaoSelecionada != null && !string.IsNullOrWhiteSpace(TextoResposta))
+        {
+            await SolicitacaoService.ResponderSolicitacaoAsync(SolicitacaoSelecionada.Id, TextoResposta);
+            MensagemFeedback = "Resposta registrada e enviada ao associado!";
+            SolicitacaoSelecionada = null;
+            await CarregarSolicitacoesAsync();
+        }
+    }
+}

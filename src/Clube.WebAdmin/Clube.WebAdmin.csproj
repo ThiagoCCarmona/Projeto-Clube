@@ -2,6 +2,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Clube.Shared\Clube.Shared.csproj" />
+    <ProjectReference Include="..\Clube.Domain\Clube.Domain.csproj" />
+    <ProjectReference Include="..\Clube.Application\Clube.Application.csproj" />
+    <ProjectReference Include="..\Clube.Infrastructure\Clube.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
