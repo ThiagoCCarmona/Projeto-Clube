@@ -3,12 +3,36 @@
     x:Class="Clube.Mobile.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:Clube.Mobile"
-    Title="Clube.Mobile">
+    xmlns:views="clr-namespace:Clube.Mobile.Views"
+    Title="Projeto Clubes"
+    FlyoutBehavior="Disabled">
 
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        Title="Login"
+        Route="LoginPage"
+        ContentTemplate="{DataTemplate views:LoginPage}" />
+
+    <ShellContent
+        Title="Cadastro"
+        Route="RegisterPage"
+        ContentTemplate="{DataTemplate views:RegisterPage}" />
+
+    <TabBar Route="AppTabs">
+        <Tab Title="Eventos" Route="EventosPage">
+            <ShellContent ContentTemplate="{DataTemplate views:EventosPage}" />
+        </Tab>
+        <Tab Title="Reservas" Route="ReservasPage">
+            <ShellContent ContentTemplate="{DataTemplate views:ReservasPage}" />
+        </Tab>
+        <Tab Title="Mensalidades" Route="MensalidadesPage">
+            <ShellContent ContentTemplate="{DataTemplate views:MensalidadesPage}" />
+        </Tab>
+        <Tab Title="SAC" Route="SacPage">
+            <ShellContent ContentTemplate="{DataTemplate views:SacPage}" />
+        </Tab>
+        <Tab Title="Perfil" Route="PerfilPage">
+            <ShellContent ContentTemplate="{DataTemplate views:PerfilPage}" />
+        </Tab>
+    </TabBar>
 
 </Shell>

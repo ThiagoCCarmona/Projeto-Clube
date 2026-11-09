@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Clube.Mobile.ViewModels"
+             xmlns:models="clr-namespace:Clube.Mobile.Models"
+             x:Class="Clube.Mobile.Views.ReservasPage"
+             x:DataType="vm:ReservasViewModel"
+             Title="Reservas"
+             BackgroundColor="#0f172a">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="16">
+            
+            <Label Text="Locação de Espaços" FontSize="20" FontAttributes="Bold" TextColor="White" />
+            <Label Text="Reserve o Salão Social, Churrasqueira ou Quiosques com intervalo contínuo de horários." TextColor="#94a3b8" FontSize="13" />
+
+            <Label Text="{Binding StatusMessage}" TextColor="#38bdf8" FontSize="13" />
+
+            <!-- Formulário de Nova Reserva -->
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="#1e293b" Stroke="#334155" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Nova Solicitação de Reserva" TextColor="White" FontSize="16" FontAttributes="Bold" />
+
+                    <Label Text="Espaço Desejado" TextColor="#cbd5e1" FontSize="12" FontAttributes="Bold" />
+                    <Picker ItemsSource="{Binding EspacosDisponiveis}"
+                            ItemDisplayBinding="{Binding (models:LocalEspaco.Nome)}"
+                            SelectedItem="{Binding EspacoSelecionado}"
+                            TextColor="White"
+                            BackgroundColor="#0f172a"
+                            Title="Selecione o espaço..." />
+
+                    <!-- Início -->
+                    <Grid ColumnDefinitions="*,*">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                            <Label Text="Data de Início" TextColor="#cbd5e1" FontSize="12" />
+                            <DatePicker Date="{Binding DataInicio}" TextColor="White" BackgroundColor="#0f172a" Format="dd/MM/yyyy" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                            <Label Text="Hora de Início" TextColor="#cbd5e1" FontSize="12" />
+                            <TimePicker Time="{Binding HoraInicio}" TextColor="White" BackgroundColor="#0f172a" Format="HH:mm" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Término -->
+                    <Grid ColumnDefinitions="*,*">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                            <Label Text="Data de Término" TextColor="#cbd5e1" FontSize="12" />
+                            <DatePicker Date="{Binding DataFim}" TextColor="White" BackgroundColor="#0f172a" Format="dd/MM/yyyy" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                            <Label Text="Hora de Término" TextColor="#cbd5e1" FontSize="12" />
+                            <TimePicker Time="{Binding HoraFim}" TextColor="White" BackgroundColor="#0f172a" Format="HH:mm" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Label Text="Finalidade (ex: Feijoada Beneficente, Aniversário)" TextColor="#cbd5e1" FontSize="12" FontAttributes="Bold" />
+                    <Entry Text="{Binding Finalidade}" Placeholder="Finalidade do evento" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+
+                    <Label Text="Observações Adicionais" TextColor="#cbd5e1" FontSize="12" />
+                    <Entry Text="{Binding Observacoes}" Placeholder="Necessidades de montagem, convidados..." TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+
+                    <Button Text="Solicitar Reserva"
+                            Command="{Binding SolicitarReservaCommand}"
+                            BackgroundColor="#10b981"
+                            TextColor="White"
+                            CornerRadius="8"
+                            FontAttributes="Bold"
+                            HeightRequest="44"
+                            Margin="0,6,0,0" />
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Histórico de Reservas -->
+            <Label Text="Minhas Reservas Solicitadas" TextColor="White" FontSize="16" FontAttributes="Bold" Margin="0,8,0,0" />
+
+            <CollectionView ItemsSource="{Binding MinhasReservas}">
+                <CollectionView.EmptyView>
+                    <Label Text="Nenhuma reserva solicitada no momento." TextColor="#64748b" FontSize="13" Padding="20" HorizontalTextAlignment="Center" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:LocalReserva">
+                        <Border StrokeShape="RoundRectangle 8" BackgroundColor="#1e293b" Stroke="#334155" Padding="14" Margin="0,0,0,8">
+                            <VerticalStackLayout Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0" Text="{Binding NomeEspaco}" TextColor="White" FontAttributes="Bold" FontSize="15" />
+                                    <Border Grid.Column="1" StrokeShape="RoundRectangle 4" BackgroundColor="#334155" Padding="6,2">
+                                        <Label Text="{Binding Status}" TextColor="#38bdf8" FontSize="11" FontAttributes="Bold" />
+                                    </Border>
+                                </Grid>
+                                
+                                <Label Text="{Binding FinalidadeUso}" TextColor="#cbd5e1" FontSize="13" />
+
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="📅" FontSize="12" />
+                                    <Label Text="{Binding DataHoraInicio, StringFormat='{0:dd/MM/yyyy HH:mm}'}" TextColor="#94a3b8" FontSize="12" />
+                                    <Label Text="até" TextColor="#64748b" FontSize="12" />
+                                    <Label Text="{Binding DataHoraFim, StringFormat='{0:dd/MM/yyyy HH:mm}'}" TextColor="#94a3b8" FontSize="12" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Clube.Mobile.ViewModels"
+             xmlns:models="clr-namespace:Clube.Mobile.Models"
+             x:Class="Clube.Mobile.Views.RegisterPage"
+             x:DataType="vm:RegisterViewModel"
+             Title="Filiação ao Clube"
+             BackgroundColor="#0f172a">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="20">
+
+            <Label Text="Solicitação de Filiação"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="White" />
+            
+            <Label Text="Cadastre-se como Sócio Convidado ou Simpatizante. Sua adesão passará por homologação da diretoria."
+                   FontSize="13"
+                   TextColor="#94a3b8" />
+
+            <Label Text="{Binding StatusMessage}" TextColor="#38bdf8" FontSize="13" />
+
+            <!-- Dados Principais -->
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="#1e293b" Stroke="#334155" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    
+                    <Label Text="Clube de Destino" TextColor="#cbd5e1" FontAttributes="Bold" FontSize="13" />
+                    <Picker ItemsSource="{Binding ClubesDisponiveis}"
+                            ItemDisplayBinding="{Binding (models:LocalClube.Nome)}"
+                            SelectedItem="{Binding ClubeSelecionado}"
+                            TextColor="White"
+                            BackgroundColor="#0f172a"
+                            Title="Selecione o clube..." />
+
+                    <Label Text="Nome Completo*" TextColor="#cbd5e1" FontAttributes="Bold" FontSize="13" />
+                    <Entry Text="{Binding Nome}" Placeholder="ex: Carlos Silva" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+
+                    <Label Text="E-mail*" TextColor="#cbd5e1" FontAttributes="Bold" FontSize="13" />
+                    <Entry Text="{Binding Email}" Keyboard="Email" Placeholder="ex: carlos@email.com" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+
+                    <Label Text="Senha de Acesso*" TextColor="#cbd5e1" FontAttributes="Bold" FontSize="13" />
+                    <Entry Text="{Binding Senha}" IsPassword="True" Placeholder="••••••••" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+
+                    <Label Text="CPF (apenas números)*" TextColor="#cbd5e1" FontAttributes="Bold" FontSize="13" />
+                    <Entry Text="{Binding CPF}" Keyboard="Numeric" Placeholder="000.000.000-00" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+
+                    <Label Text="Telefone / WhatsApp" TextColor="#cbd5e1" FontAttributes="Bold" FontSize="13" />
+                    <Entry Text="{Binding Telefone}" Keyboard="Telephone" Placeholder="(45) 99999-9999" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Endereço e Dados Pessoais -->
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="#1e293b" Stroke="#334155" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    
+                    <Label Text="Endereço Residencial" TextColor="#cbd5e1" FontAttributes="Bold" FontSize="13" />
+                    <Entry Text="{Binding Endereco}" Placeholder="Rua, Número, Complemento" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+
+                    <Grid ColumnDefinitions="*,*">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                            <Label Text="Bairro" TextColor="#cbd5e1" FontSize="12" />
+                            <Entry Text="{Binding Bairro}" Placeholder="Bairro" TextColor="White" BackgroundColor="#0f172a" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                            <Label Text="Cidade / UF" TextColor="#cbd5e1" FontSize="12" />
+                            <Entry Text="{Binding Cidade}" Placeholder="Cidade" TextColor="White" BackgroundColor="#0f172a" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Label Text="Data de Nascimento" TextColor="#cbd5e1" FontAttributes="Bold" FontSize="13" />
+                    <DatePicker Date="{Binding DataNascimento}" TextColor="White" BackgroundColor="#0f172a" Format="dd/MM/yyyy" />
+
+                    <Grid ColumnDefinitions="*,*">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                            <Label Text="Sexo" TextColor="#cbd5e1" FontSize="12" />
+                            <Entry Text="{Binding Sexo}" Placeholder="Masculino/Feminino" TextColor="White" BackgroundColor="#0f172a" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                            <Label Text="Estado Civil" TextColor="#cbd5e1" FontSize="12" />
+                            <Entry Text="{Binding EstadoCivil}" Placeholder="Casado(a), Solteiro(a)" TextColor="White" BackgroundColor="#0f172a" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Label Text="Interesses (pesca, caça, comida, bebida...)" TextColor="#cbd5e1" FontAttributes="Bold" FontSize="13" />
+                    <Entry Text="{Binding Interesses}" Placeholder="ex: Pesca esportiva, gastronomia, futebol" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+
+                </VerticalStackLayout>
+            </Border>
+
+            <Button Text="Enviar Filiação (Online ou Offline)"
+                    Command="{Binding CadastrarCommand}"
+                    BackgroundColor="#10b981"
+                    TextColor="White"
+                    CornerRadius="8"
+                    FontAttributes="Bold"
+                    HeightRequest="48" />
+
+            <Button Text="Voltar ao Login"
+                    Command="{Binding VoltarLoginCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="#94a3b8" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" 
+                               IsVisible="{Binding IsBusy}" 
+                               Color="#10b981" 
+                               HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

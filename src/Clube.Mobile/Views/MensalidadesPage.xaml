@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Clube.Mobile.ViewModels"
+             xmlns:models="clr-namespace:Clube.Mobile.Models"
+             x:Class="Clube.Mobile.Views.MensalidadesPage"
+             x:DataType="vm:MensalidadesViewModel"
+             Title="Mensalidades"
+             BackgroundColor="#0f172a">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="16">
+            
+            <Label Text="Situação Financeira" FontSize="20" FontAttributes="Bold" TextColor="White" />
+            <Label Text="Acompanhe suas mensalidades e efetue o pagamento instantâneo via PIX." TextColor="#94a3b8" FontSize="13" />
+
+            <!-- KPIs -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Border Grid.Column="0" StrokeShape="RoundRectangle 12" BackgroundColor="#1e293b" Stroke="#10b981" StrokeThickness="1" Padding="14">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Total Liquidado" TextColor="#94a3b8" FontSize="11" />
+                        <Label Text="{Binding TotalPago, StringFormat='{0:C}'}" TextColor="#10b981" FontSize="18" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Column="1" StrokeShape="RoundRectangle 12" BackgroundColor="#1e293b" Stroke="#f59e0b" StrokeThickness="1" Padding="14">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Total Pendente" TextColor="#94a3b8" FontSize="11" />
+                        <Label Text="{Binding TotalPendente, StringFormat='{0:C}'}" TextColor="#f59e0b" FontSize="18" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                <Label Grid.Column="0" Text="Histórico de Cobranças" TextColor="White" FontSize="16" FontAttributes="Bold" VerticalOptions="Center" />
+                <Button Grid.Column="1" Text="Sincronizar" Command="{Binding SincronizarCommand}" BackgroundColor="#2563eb" TextColor="White" CornerRadius="6" HeightRequest="32" FontSize="11" />
+            </Grid>
+
+            <!-- Lista de Mensalidades -->
+            <CollectionView ItemsSource="{Binding Mensalidades}">
+                <CollectionView.EmptyView>
+                    <Label Text="Nenhuma mensalidade lançada para o seu cadastro." TextColor="#64748b" FontSize="13" Padding="20" HorizontalTextAlignment="Center" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:LocalMensalidade">
+                        <Border StrokeShape="RoundRectangle 12" BackgroundColor="#1e293b" Stroke="#334155" Padding="16" Margin="0,0,0,10">
+                            <VerticalStackLayout Spacing="10">
+                                
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <HorizontalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
+                                        <Label Text="Competência:" TextColor="#94a3b8" FontSize="13" />
+                                        <Label Text="{Binding Competencia}" TextColor="White" FontAttributes="Bold" FontSize="14" />
+                                    </HorizontalStackLayout>
+                                    <Border Grid.Column="1" StrokeShape="RoundRectangle 4" BackgroundColor="#334155" Padding="8,3">
+                                        <Label Text="{Binding Status}" TextColor="#38bdf8" FontSize="11" FontAttributes="Bold" />
+                                    </Border>
+                                </Grid>
+
+                                <Grid ColumnDefinitions="*,*">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="Vencimento" TextColor="#64748b" FontSize="11" />
+                                        <Label Text="{Binding DataVencimento, StringFormat='{0:dd/MM/yyyy}'}" TextColor="#cbd5e1" FontSize="13" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="End">
+                                        <Label Text="Valor" TextColor="#64748b" FontSize="11" HorizontalTextAlignment="End" />
+                                        <Label Text="{Binding Valor, StringFormat='{0:C}'}" TextColor="White" FontAttributes="Bold" FontSize="15" />
+                                    </VerticalStackLayout>
+                                </Grid>
+
+                                <Button Text="Copiar Código PIX"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MensalidadesViewModel}}, Path=CopiarPixCommand}"
+                                        CommandParameter="{Binding CodigoPixCopiaECola}"
+                                        BackgroundColor="#10b981"
+                                        TextColor="White"
+                                        CornerRadius="6"
+                                        FontSize="12"
+                                        HeightRequest="36" />
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

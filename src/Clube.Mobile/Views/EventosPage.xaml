@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Clube.Mobile.ViewModels"
+             xmlns:models="clr-namespace:Clube.Mobile.Models"
+             x:Class="Clube.Mobile.Views.EventosPage"
+             x:DataType="vm:EventosViewModel"
+             Title="Eventos"
+             BackgroundColor="#0f172a">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="16">
+        
+        <!-- Offline/Online Status Banner -->
+        <Border Grid.Row="0"
+                StrokeShape="RoundRectangle 8"
+                Padding="12,8"
+                Margin="0,0,0,12"
+                StrokeThickness="1"
+                BackgroundColor="{Binding StatusConexaoCor}"
+                Stroke="#334155">
+            <Grid ColumnDefinitions="*,Auto">
+                <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                    <Label Text="⚡" FontSize="14" />
+                    <Label Text="{Binding StatusConexaoTexto}"
+                           TextColor="White"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <Button Grid.Column="1"
+                        Text="Sincronizar"
+                        Command="{Binding SincronizarCommand}"
+                        BackgroundColor="#2563eb"
+                        TextColor="White"
+                        CornerRadius="6"
+                        FontSize="11"
+                        HeightRequest="32"
+                        Padding="10,0" />
+            </Grid>
+        </Border>
+
+        <!-- Filtros Rápidos -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="8" Margin="0,0,0,12">
+            <Button Grid.Column="0" Text="Todos" Command="{Binding CarregarEventosCommand}" BackgroundColor="#1e293b" TextColor="White" CornerRadius="6" HeightRequest="36" FontSize="12" />
+            <Button Grid.Column="1" Text="Sócios" BackgroundColor="#1e293b" TextColor="#38bdf8" CornerRadius="6" HeightRequest="36" FontSize="12" />
+            <Button Grid.Column="2" Text="Público" BackgroundColor="#1e293b" TextColor="#10b981" CornerRadius="6" HeightRequest="36" FontSize="12" />
+        </Grid>
+
+        <!-- Lista de Eventos -->
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsBusy}" Command="{Binding CarregarEventosCommand}">
+            <CollectionView ItemsSource="{Binding Eventos}">
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center" Padding="40">
+                        <Label Text="📅" FontSize="40" HorizontalOptions="Center" />
+                        <Label Text="Nenhum evento agendado" TextColor="White" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" />
+                        <Label Text="Puxe para baixo para atualizar ou sincronizar com o clube." TextColor="#64748b" FontSize="12" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:LocalEvento">
+                        <Border StrokeShape="RoundRectangle 12"
+                                BackgroundColor="#1e293b"
+                                Stroke="#334155"
+                                Padding="16"
+                                Margin="0,0,0,12">
+                            <VerticalStackLayout Spacing="10">
+                                
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0" Text="{Binding Titulo}" TextColor="White" FontSize="16" FontAttributes="Bold" />
+                                    <Border Grid.Column="1" StrokeShape="RoundRectangle 4" BackgroundColor="#334155" Padding="6,2">
+                                        <Label Text="{Binding PublicoDestino}" TextColor="#38bdf8" FontSize="11" FontAttributes="Bold" />
+                                    </Border>
+                                </Grid>
+
+                                <Label Text="{Binding Descricao}" TextColor="#94a3b8" FontSize="13" />
+
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="🕒" FontSize="12" />
+                                    <Label Text="{Binding DataHoraInicio, StringFormat='{0:dd/MM/yyyy HH:mm}'}" TextColor="#cbd5e1" FontSize="12" />
+                                    <Label Text="até" TextColor="#64748b" FontSize="12" />
+                                    <Label Text="{Binding DataHoraFim, StringFormat='{0:dd/MM/yyyy HH:mm}'}" TextColor="#cbd5e1" FontSize="12" />
+                                </HorizontalStackLayout>
+
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0" Text="{Binding ValorEntrada, StringFormat='Entrada: {0:C}'}" TextColor="#10b981" FontAttributes="Bold" FontSize="14" VerticalOptions="Center" />
+                                    
+                                    <Button Grid.Column="1"
+                                            Text="Confirmar Presença"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:EventosViewModel}}, Path=InscreverEventoCommand}"
+                                            CommandParameter="{Binding Id}"
+                                            BackgroundColor="#2563eb"
+                                            TextColor="White"
+                                            CornerRadius="6"
+                                            FontSize="12"
+                                            HeightRequest="36" />
+                                </Grid>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+    </Grid>
+</ContentPage>

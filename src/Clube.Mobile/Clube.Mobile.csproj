@@ -72,6 +72,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Clube.Shared\Clube.Shared.csproj" />
+	  <ProjectReference Include="..\Clube.Domain\Clube.Domain.csproj" />
 	</ItemGroup>
 
 </Project>

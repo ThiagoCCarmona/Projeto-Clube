@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Clube.Mobile.ViewModels"
+             xmlns:models="clr-namespace:Clube.Mobile.Models"
+             x:Class="Clube.Mobile.Views.PerfilPage"
+             x:DataType="vm:PerfilViewModel"
+             Title="Meu Perfil"
+             BackgroundColor="#0f172a">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="16">
+            
+            <!-- Header do Usuário -->
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="#1e293b" Stroke="#334155" Padding="16">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Border Grid.Column="0" StrokeShape="RoundRectangle 20" BackgroundColor="#2563eb" WidthRequest="44" HeightRequest="44" Margin="0,0,12,0">
+                            <Label Text="👤" FontSize="20" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                            <Label Text="{Binding Sessao.Nome}" TextColor="White" FontSize="16" FontAttributes="Bold" />
+                            <Label Text="{Binding Sessao.Email}" TextColor="#94a3b8" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Label Text="{Binding Sessao.CPF, StringFormat='CPF: {0}'}" TextColor="#cbd5e1" FontSize="12" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Card de Prerrogativa Estatutária (Direito a Voto) -->
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="#1e293b" Stroke="#2563eb" StrokeThickness="1" Padding="16">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Condição Associativa &amp; Prerrogativas" TextColor="#38bdf8" FontSize="13" FontAttributes="Bold" />
+                    <Label Text="{Binding DescricaoDireitoVoto}" TextColor="White" FontSize="12" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Dependentes Familiares -->
+            <Border StrokeShape="RoundRectangle 12" BackgroundColor="#1e293b" Stroke="#334155" Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Dependentes Cadastrados" TextColor="White" FontSize="15" FontAttributes="Bold" />
+                    <Label Text="Dependentes vinculados ao seu plano têm acesso às dependências e eventos familiares do clube." TextColor="#94a3b8" FontSize="12" />
+
+                    <CollectionView ItemsSource="{Binding Dependentes}">
+                        <CollectionView.EmptyView>
+                            <Label Text="Nenhum dependente cadastrado até o momento." TextColor="#64748b" FontSize="12" Padding="10" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:LocalDependente">
+                                <Border StrokeShape="RoundRectangle 6" BackgroundColor="#0f172a" Stroke="#334155" Padding="10" Margin="0,0,0,6">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding Nome}" TextColor="White" FontSize="13" FontAttributes="Bold" />
+                                            <Label Text="{Binding CPF, StringFormat='CPF: {0}'}" TextColor="#64748b" FontSize="11" />
+                                        </VerticalStackLayout>
+                                        <Border Grid.Column="1" StrokeShape="RoundRectangle 4" BackgroundColor="#334155" Padding="6,2">
+                                            <Label Text="{Binding Parentesco}" TextColor="#38bdf8" FontSize="11" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- Form Novo Dependente -->
+                    <Label Text="Adicionar Novo Dependente" TextColor="#cbd5e1" FontSize="13" FontAttributes="Bold" Margin="0,6,0,0" />
+                    
+                    <Entry Text="{Binding NovoDepNome}" Placeholder="Nome do Dependente" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+                    <Entry Text="{Binding NovoDepCpf}" Placeholder="CPF do Dependente" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" Keyboard="Numeric" />
+                    <Entry Text="{Binding NovoDepParentesco}" Placeholder="Parentesco (ex: Filho(a), Cônjuge)" TextColor="White" PlaceholderColor="#64748b" BackgroundColor="#0f172a" />
+
+                    <Button Text="+ Adicionar Dependente"
+                            Command="{Binding AdicionarDependenteCommand}"
+                            BackgroundColor="#10b981"
+                            TextColor="White"
+                            CornerRadius="6"
+                            FontSize="12"
+                            HeightRequest="38" />
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Ações -->
+            <Button Text="Sincronizar Dados Agora"
+                    Command="{Binding SincronizarCommand}"
+                    BackgroundColor="#2563eb"
+                    TextColor="White"
+                    CornerRadius="8"
+                    FontAttributes="Bold"
+                    HeightRequest="44" />
+
+            <Button Text="Sair da Minha Conta"
+                    Command="{Binding LogoutCommand}"
+                    BackgroundColor="#ef4444"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="44" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
