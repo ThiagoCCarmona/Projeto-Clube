@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Clube.Application.Interfaces;
 using Clube.Domain.Entities;
 using Clube.Domain.Enums;
 using Clube.Infrastructure.Data;

@@ -1,9 +1,2 @@
-using System;
-
-namespace Clube.Infrastructure.Data;
-
-public interface ITenantContext
-{
-    Guid? CurrentClubeId { get; set; }
-    bool IsSuperAdmin { get; }
-}
+// Re-export or forward to Application interface
+global using ITenantContext = Clube.Application.Interfaces.ITenantContext;

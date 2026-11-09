@@ -1,11 +1,12 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using Clube.Application.Interfaces;
 using Clube.Domain.Entities;
 using Clube.Domain.Enums;
 
 namespace Clube.Infrastructure.Data;
 
-public class ClubeDbContext : DbContext
+public class ClubeDbContext : DbContext, IClubeDbContext
 {
     private readonly ITenantContext _tenantContext;
 
